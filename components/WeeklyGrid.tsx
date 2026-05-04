@@ -13,8 +13,9 @@ import { useOwner } from '@/hooks/useOwner';
 import { Slot, PastelColor, Label } from '@/types';
 
 const HOURS = [
-  '08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00',
-  '15:00', '16:00', '17:00', '18:00', '19:00', '20:00'
+  '06:00', '07:00', '08:00', '09:00', '10:00', '11:00', '12:00',
+  '13:00', '14:00', '15:00', '16:00', '17:00', '18:00', '19:00',
+  '20:00', '21:00', '22:00', '23:00', '24:00'
 ];
 
 export default function WeeklyGrid() {
@@ -43,17 +44,25 @@ export default function WeeklyGrid() {
 
   const handleSlotClick = (day: string, hour: string) => {
     if (!isOwner) return;
+    
+    console.log('Slot clicked:', day, hour, 'Owner:', isOwner);
     setSelectedSlot({ day, hour });
     setShowColorPicker(true);
   };
 
   const handleColorSelect = (color: PastelColor) => {
+    console.log('Color selected:', color);
     setSelectedColor(color);
     setShowLabelPicker(true);
   };
 
   const handleLabelSelect = async (label: Label) => {
-    if (!selectedSlot || !selectedColor || !fingerprint) return;
+    if (!selectedSlot || !selectedColor || !fingerprint) {
+      console.error('Missing data:', { selectedSlot, selectedColor, fingerprint });
+      return;
+    }
+
+    console.log('Saving slot:', selectedSlot, selectedColor, label, fingerprint);
 
     const newSlot = await toggleSlot(
       selectedSlot.day,
@@ -62,6 +71,8 @@ export default function WeeklyGrid() {
       selectedColor,
       label
     );
+
+    console.log('Slot saved:', newSlot);
 
     if (newSlot) {
       setSlots(prev => {
@@ -94,35 +105,35 @@ export default function WeeklyGrid() {
   }
 
   return (
-    <div className="min-h-screen bg-white p-4 md:p-8">
+    <div className="min-h-screen bg-white p-2 md:p-4">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="text-center mb-8"
+          className="text-center mb-4"
         >
-          <h1 className="text-5xl font-display font-bold text-transparent bg-clip-text bg-gradient-to-r from-pastel-pink via-pastel-lavender to-pastel-blue mb-2">
+          <h1 className="text-4xl font-display font-bold text-transparent bg-clip-text bg-gradient-to-r from-pastel-pink via-pastel-lavender to-pastel-blue mb-1">
             Mi Agenda Semanal
           </h1>
-          <p className="text-gray-600 font-body">
+          <p className="text-gray-600 font-body text-sm">
             {isOwner ? '✨ Toca una celda para configurarla' : '👀 Modo solo lectura'}
           </p>
         </motion.div>
 
         {/* Grid */}
-        <div className="bg-gradient-to-br from-pastel-pink/10 via-pastel-lavender/10 to-pastel-blue/10 rounded-3xl p-6 shadow-soft">
+        <div className="bg-gradient-to-br from-pastel-pink/10 via-pastel-lavender/10 to-pastel-blue/10 rounded-2xl p-3 shadow-soft">
           <div className="overflow-x-auto">
             <div className="min-w-max">
               {/* Header días */}
-              <div className="grid grid-cols-8 gap-4 mb-4">
-                <div className="w-20" /> {/* Espacio para horas */}
+              <div className="grid grid-cols-8 gap-2 mb-2">
+                <div className="w-16" /> {/* Espacio para horas */}
                 {weekDays.map(day => (
                   <div key={day.toString()} className="text-center">
-                    <div className="font-display font-bold text-gray-800 text-lg">
+                    <div className="font-display font-bold text-gray-800 text-sm">
                       {format(day, 'EEE', { locale: es })}
                     </div>
-                    <div className="font-body text-sm text-gray-600">
+                    <div className="font-body text-xs text-gray-600">
                       {format(day, 'd MMM', { locale: es })}
                     </div>
                   </div>
@@ -135,12 +146,12 @@ export default function WeeklyGrid() {
                   key={hour}
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: hourIdx * 0.05 }}
-                  className="grid grid-cols-8 gap-4 mb-4"
+                  transition={{ delay: hourIdx * 0.02 }}
+                  className="grid grid-cols-8 gap-2 mb-2"
                 >
                   {/* Hora */}
-                  <div className="w-20 flex items-center justify-end pr-4">
-                    <span className="font-body text-gray-600 font-semibold">
+                  <div className="w-16 flex items-center justify-end pr-2">
+                    <span className="font-body text-gray-600 font-semibold text-xs">
                       {hour}
                     </span>
                   </div>

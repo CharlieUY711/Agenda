@@ -42,9 +42,9 @@ export default function SlotButton({
       disabled={!isOwner}
       className={`
         ${bgClass}
-        ${hasContent ? 'shadow-soft' : 'border-2 border-gray-100'}
+        ${hasContent ? 'shadow-soft' : 'border border-gray-100'}
         ${isOwner ? 'cursor-pointer hover:shadow-soft-hover' : 'cursor-not-allowed opacity-75'}
-        w-full h-16 rounded-2xl transition-all duration-300
+        w-full h-8 rounded-xl transition-all duration-300
         flex items-center justify-center
         font-display font-bold text-gray-800
       `}
@@ -53,7 +53,7 @@ export default function SlotButton({
         <motion.span
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="text-lg"
+          className="text-xs"
         >
           {label}
         </motion.span>
