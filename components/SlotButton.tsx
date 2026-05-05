@@ -44,7 +44,7 @@ export default function SlotButton({
         ${bgClass}
         ${hasContent ? 'shadow-soft' : 'border border-gray-100'}
         ${isOwner ? 'cursor-pointer hover:shadow-soft-hover' : 'cursor-not-allowed opacity-75'}
-        w-full h-8 rounded-xl transition-all duration-300
+        w-full h-9 rounded-lg transition-all duration-300
         flex items-center justify-center
         font-display font-bold text-gray-800
       `}
