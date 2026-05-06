@@ -142,7 +142,7 @@ export default function WeeklyGrid() {
   }
 
   return (
-    <div className="min-h-screen bg-white p-2 md:p-3">
+    <div className="min-h-screen bg-white flex justify-center p-2 md:p-3">
       <div className="max-w-full mx-auto">
         <motion.div
           initial={{ opacity: 0, y: -20 }}
@@ -253,3 +253,6 @@ export default function WeeklyGrid() {
     </div>
   );
 }
+
+
+
