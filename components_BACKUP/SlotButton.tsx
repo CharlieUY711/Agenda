@@ -38,8 +38,8 @@ export default function SlotButton({
     <motion.button
       whileHover={isOwner ? { scale: 1.05 } : {}}
       whileTap={isOwner ? { scale: 0.95 } : {}}
-      onClick={onClick}
-      disabled={false}
+      onClick={isOwner ? onClick : undefined}
+      disabled={!isOwner}
       className={`
         ${bgClass}
         ${hasContent ? 'shadow-soft' : 'border border-gray-100'}
@@ -61,4 +61,3 @@ export default function SlotButton({
     </motion.button>
   );
 }
-

@@ -107,8 +107,6 @@ export default function WeeklyGrid() {
         />
       </div>
     );
-  }
-
   return (
     <div className="min-h-screen bg-white p-2 md:p-3">
       <div className="max-w-7xl mx-auto">
@@ -187,3 +185,4 @@ export default function WeeklyGrid() {
     </div>
   );
 }
+

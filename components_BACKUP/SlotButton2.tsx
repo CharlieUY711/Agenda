@@ -38,13 +38,13 @@ export default function SlotButton({
     <motion.button
       whileHover={isOwner ? { scale: 1.05 } : {}}
       whileTap={isOwner ? { scale: 0.95 } : {}}
-      onClick={onClick}
-      disabled={false}
+      onClick={isOwner ? onClick : undefined}
+      disabled={!isOwner}
       className={`
         ${bgClass}
         ${hasContent ? 'shadow-soft' : 'border border-gray-100'}
         ${isOwner ? 'cursor-pointer hover:shadow-soft-hover' : 'cursor-not-allowed opacity-75'}
-        w-full h-9 rounded-lg transition-all duration-300
+        w-full h-6 rounded-lg transition-all duration-300
         flex items-center justify-center
         font-display font-bold text-gray-800
       `}
@@ -53,7 +53,7 @@ export default function SlotButton({
         <motion.span
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="text-xs"
+          className="text-[10px]"
         >
           {label}
         </motion.span>
@@ -61,4 +61,3 @@ export default function SlotButton({
     </motion.button>
   );
 }
-

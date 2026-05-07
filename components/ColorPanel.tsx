@@ -2,13 +2,7 @@
 
 import { motion } from 'framer-motion';
 import { PastelColor, Label } from '@/types';
-
-interface ColorPanelProps {
-  selectedColor: PastelColor | null;
-  selectedLabel: Label | null;
-  onColorSelect: (color: PastelColor) => void;
-  onLabelSelect: (label: Label) => void;
-}
+import { useAgenda } from '@/context/AgendaContext';
 
 const colorOptions: { color: PastelColor; bgClass: string }[] = [
   { color: 'pink', bgClass: 'bg-pastel-pink' },
@@ -23,61 +17,59 @@ const colorOptions: { color: PastelColor; bgClass: string }[] = [
 
 const labelOptions: Label[] = ['✓', '★', '♥', '◆', '●', '▲', '■', '✕'];
 
-export default function ColorPanel({
-  selectedColor,
-  selectedLabel,
-  onColorSelect,
-  onLabelSelect,
-}: ColorPanelProps) {
-  return (
-    <div className="flex-shrink-0 w-24 mr-4">
-      <div className="sticky top-4">
-        {/* Título */}
-        <div className="text-center mb-3">
-          <h3 className="text-xs font-display font-bold text-gray-600 mb-1">
-            Colores
-          </h3>
-        </div>
+export default function ColorPanel() {
+  const {
+    selectedColor,
+    selectedLabel,
+    setSelectedColor,
+    setSelectedLabel,
+  } = useAgenda();
 
-        {/* Grid de colores */}
-        <div className="grid grid-cols-2 gap-2 mb-4">
+  return (
+    <div className="w-32">
+
+      {/* HEADER */}
+      <div className="text-xs text-gray-500 mb-2 text-center">
+        Opciones
+      </div>
+
+      {/* GRID 2 COLUMNAS */}
+      <div className="grid grid-cols-2 gap-2">
+
+        {/* COLORES */}
+        <div className="flex flex-col gap-2">
           {colorOptions.map(({ color, bgClass }) => (
             <motion.button
               key={color}
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
-              onClick={() => onColorSelect(color)}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => setSelectedColor(color)}
               className={`
                 ${bgClass}
-                ${selectedColor === color ? 'ring-2 ring-gray-800 ring-offset-2' : 'ring-1 ring-gray-200'}
-                w-full h-10 rounded-lg transition-all shadow-soft
-                hover:shadow-soft-hover
+                w-full h-8 rounded-lg
+                ${selectedColor === color ? 'ring-2 ring-black' : ''}
               `}
             />
           ))}
         </div>
 
-        {/* Título emojis */}
-        <div className="text-center mb-3 mt-6">
-          <h3 className="text-xs font-display font-bold text-gray-600 mb-1">
-            Íconos
-          </h3>
-        </div>
-
-        {/* Grid de emojis */}
-        <div className="grid grid-cols-2 gap-2">
+        {/* ICONOS */}
+        <div className="flex flex-col gap-2">
           {labelOptions.map((label) => (
             <motion.button
               key={label}
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
-              onClick={() => onLabelSelect(label)}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => setSelectedLabel(label)}
               className={`
-                ${selectedLabel === label ? 'bg-gray-200 ring-2 ring-gray-800' : 'bg-white border border-gray-200'}
-                w-full h-10 rounded-lg transition-all
+                w-full h-8 rounded-lg border
                 flex items-center justify-center
-                font-display font-bold text-gray-800 text-sm
-                hover:bg-gray-100
+                text-sm font-bold
+                ${
+                  selectedLabel === label
+                    ? 'bg-gray-200 border-gray-400'
+                    : 'bg-white border-gray-200'
+                }
               `}
             >
               {label}
@@ -85,19 +77,6 @@ export default function ColorPanel({
           ))}
         </div>
 
-        {/* Indicador de selección actual */}
-        {selectedColor && selectedLabel && (
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="mt-4 p-2 bg-white rounded-lg border border-gray-200 text-center"
-          >
-            <div className="text-[10px] text-gray-500 mb-1">Seleccionado:</div>
-            <div className={`${colorOptions.find(c => c.color === selectedColor)?.bgClass} w-full h-8 rounded flex items-center justify-center text-sm font-bold`}>
-              {selectedLabel}
-            </div>
-          </motion.div>
-        )}
       </div>
     </div>
   );

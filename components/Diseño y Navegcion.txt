@@ -1,0 +1,283 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+import { format, startOfWeek, addDays } from 'date-fns';
+import { es } from 'date-fns/locale';
+import { motion, AnimatePresence } from 'framer-motion';
+import SlotButton from './SlotButton';
+import ColorPanel from './ColorPanel';
+import { getWeeklySlots, toggleSlot } from '@/lib/database';
+import { useFingerprint } from '@/hooks/useFingerprint';
+import { useOwner } from '@/hooks/useOwner';
+import { Slot, PastelColor, Label } from '@/types';
+import { HOURS, Range, isInRange } from '@/lib/availability';
+
+const CORE_HOURS = [
+  '08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00',
+  '15:00', '16:00', '17:00', '18:00'
+];
+
+export default function WeeklyGrid({
+  currentDate,
+  setCurrentDate
+}: {
+  currentDate: Date;
+  setCurrentDate: React.Dispatch<React.SetStateAction<Date>>;
+}) {
+  const [slots, setSlots] = useState([]);
+  const [blocked, setBlocked] = useState<Record<string, Range[]>>({});
+  const [editMode, setEditMode] = useState(false);
+  const [selectedColor, setSelectedColor] = useState<PastelColor | null>(null);
+  const [selectedLabel, setSelectedLabel] = useState<Label | null>(null);
+
+  const [earlyExpansion, setEarlyExpansion] =
+    useState<'collapsed' | 'semi' | 'full'>('collapsed');
+
+  const [lateExpansion, setLateExpansion] =
+    useState<'collapsed' | 'semi' | 'full'>('collapsed');
+
+  const [localDate, setLocalDate] = useState(currentDate); 
+  const { fingerprint } = useFingerprint();
+  const { isOwner, isLoading: ownerLoading } = useOwner();
+
+   useEffect(() => {
+   setLocalDate(currentDate);
+   }, [currentDate]);
+
+  const weekStart = startOfWeek(localDate, { weekStartsOn: 1 });
+  const weekDays = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
+
+  useEffect(() => {
+    async function loadSlots() {
+      const data = await getWeeklySlots(localDate);
+      console.log('📊 Slots cargados:', data.length);
+      setSlots(data);
+    }
+    loadSlots();
+  }, [currentDate]);
+
+  const handleSlotClick = async (day: string, hour: string) => {
+    if (!isOwner) return;
+    if (!selectedColor || !selectedLabel) return;
+    if (!fingerprint) return;
+
+    const newSlot = await toggleSlot(day, hour, fingerprint, selectedColor, selectedLabel);
+
+    if (newSlot) {
+      setSlots(prev => {
+        const filtered = prev.filter(s => !(s.day === day && s.hour === hour));
+        return [...filtered, newSlot];
+      });
+    }
+  };
+
+  const handleGroupClick = (label: string) => {
+    if (label === '00-07') {
+      setEarlyExpansion('semi');
+    } else if (label === '00-03' || label === '04-07') {
+      setEarlyExpansion('full');
+    } else if (label === '19-24') {
+      setLateExpansion('semi');
+    } else if (label === '19-21' || label === '22-24') {
+      setLateExpansion('full');
+    }
+  };
+
+  const getSlotData = (day: string, hour: string) => {
+    return slots.find(s => s.day === day && s.hour === hour);
+  };
+
+  const renderHourRow = (hour: string, isGroup: boolean = false, groupLabel?: string) => (
+    <motion.div
+      key={hour}
+      initial={{ opacity: 0, height: 0 }}
+      animate={{ opacity: 1, height: 'auto' }}
+      exit={{ opacity: 0, height: 0 }}
+      transition={{ duration: 0.2 }}
+      className="flex items-center mb-1"
+    >
+      <div className="w-14 flex-shrink-0 flex items-center justify-end mr-3">
+        <span className="font-body text-gray-600 font-semibold text-xs">
+          {hour}
+        </span>
+      </div>
+
+      <div className="flex gap-1 flex-1">
+        {weekDays.map(day => {
+          const dayStr = format(day, 'yyyy-MM-dd');
+          const slotData = getSlotData(dayStr, hour);
+
+          return (
+            <div key={`${dayStr}-${hour}`} className="w-32 flex-shrink-0">
+              {isGroup ? (
+                <button
+                  onClick={() => handleGroupClick(groupLabel || hour)}
+                  className="w-full h-8 rounded-lg bg-gray-50 border border-gray-200 hover:bg-gray-100 transition-colors flex items-center justify-center"
+                >
+                  <span className="text-[10px] text-gray-400">•</span>
+                </button>
+              ) : (
+                <SlotButton
+                  day={dayStr}
+                  hour={hour}
+                  color={slotData?.color as PastelColor}
+                  label={slotData?.label}
+                  isOwner={isOwner}
+                  onClick={() => handleSlotClick(dayStr, hour)}
+                />
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </motion.div>
+  );
+
+  if (ownerLoading) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <motion.div
+          animate={{ rotate: 360 }}
+          transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
+          className="w-16 h-16 border-4 border-pastel-pink border-t-transparent rounded-full"
+        />
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-white flex justify-center p-2 md:p-3">
+
+      <div className="max-w-full mx-auto">
+
+        {/* ❌ HEADER ELIMINADO COMPLETAMENTE */}
+
+        <div className="flex items-start">
+
+          {isOwner && (
+            <ColorPanel
+              selectedColor={selectedColor}
+              selectedLabel={selectedLabel}
+              onColorSelect={setSelectedColor}
+              onLabelSelect={setSelectedLabel}
+            />
+          )}
+
+          <div className="flex-1 bg-gradient-to-br from-pastel-pink/10 via-pastel-lavender/10 to-pastel-blue/10 rounded-xl p-2 shadow-soft">
+
+            <div className="overflow-x-auto">
+              <div className="inline-block min-w-full">
+
+                {/* DAYS ROW (se mantiene porque es parte del grid, no header de página) */}
+<div className="flex items-start mb-4">
+
+  {/* FLECHA IZQUIERDA */}
+  <button
+    onClick={() =>
+      setCurrentDate(d => {
+        const n = new Date(d);
+        n.setDate(n.getDate() - 7);
+        return n;
+      })
+    }
+    className="w-6 flex-shrink-0 mr-2 text-gray-500 hover:text-black"
+  >
+    ←
+  </button>
+
+  <div className="w-14 flex-shrink-0 mr-3" />
+
+  <div className="flex gap-1 flex-1">
+    {weekDays.map(day => (
+      <div
+        key={day.toString()}
+        className="w-32 text-center text-xs font-bold"
+      >
+        {format(day, 'EEEE d', { locale: es })}
+      </div>
+    ))}
+  </div>
+
+  {/* FLECHA DERECHA */}
+  <button
+    onClick={() =>
+      setCurrentDate(d => {
+        const n = new Date(d);
+        n.setDate(n.getDate() + 7);
+        return n;
+      })
+    }
+    className="w-6 flex-shrink-0 ml-2 text-gray-500 hover:text-black"
+  >
+    →
+  </button>
+
+</div>
+
+<div className="h-px bg-gray-200 mb-2" />
+
+                {/* EARLY */}
+                <AnimatePresence mode="wait">
+                  {earlyExpansion === 'collapsed' && (
+                    <>{renderHourRow('00-07', true, '00-07')}</>
+                  )}
+
+                  {earlyExpansion === 'semi' && (
+                    <>
+                      {renderHourRow('00-03', true, '00-03')}
+                      {renderHourRow('04-07', true, '04-07')}
+                    </>
+                  )}
+
+                  {earlyExpansion === 'full' && (
+                    <>
+                      {renderHourRow('00:00')}
+                      {renderHourRow('01:00')}
+                      {renderHourRow('02:00')}
+                      {renderHourRow('03:00')}
+                      {renderHourRow('04:00')}
+                      {renderHourRow('05:00')}
+                      {renderHourRow('06:00')}
+                      {renderHourRow('07:00')}
+                    </>
+                  )}
+                </AnimatePresence>
+
+                {/* CORE */}
+                {CORE_HOURS.map(hour => renderHourRow(hour))}
+
+                {/* LATE */}
+                <AnimatePresence mode="wait">
+                  {lateExpansion === 'collapsed' && (
+                    <>{renderHourRow('19-24', true, '19-24')}</>
+                  )}
+
+                  {lateExpansion === 'semi' && (
+                    <>
+                      {renderHourRow('19-21', true, '19-21')}
+                      {renderHourRow('22-24', true, '22-24')}
+                    </>
+                  )}
+
+                  {lateExpansion === 'full' && (
+                    <>
+                      {renderHourRow('19:00')}
+                      {renderHourRow('20:00')}
+                      {renderHourRow('21:00')}
+                      {renderHourRow('22:00')}
+                      {renderHourRow('23:00')}
+                      {renderHourRow('24:00')}
+                    </>
+                  )}
+                </AnimatePresence>
+
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+    </div>
+  );
+}

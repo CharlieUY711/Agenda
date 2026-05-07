@@ -1,10 +1,10 @@
-import type { Config } from 'tailwindcss'
+import type { Config } from "tailwindcss";
 
 const config: Config = {
   content: [
-    './pages/**/*.{js,ts,jsx,tsx,mdx}',
-    './components/**/*.{js,ts,jsx,tsx,mdx}',
-    './app/**/*.{js,ts,jsx,tsx,mdx}',
+    "./pages/**/*.{js,ts,jsx,tsx,mdx}",
+    "./components/**/*.{js,ts,jsx,tsx,mdx}",
+    "./app/**/*.{js,ts,jsx,tsx,mdx}",
   ],
   theme: {
     extend: {
@@ -21,29 +21,16 @@ const config: Config = {
         },
       },
       fontFamily: {
-        display: ['Quicksand', 'Rounded', 'system-ui', 'sans-serif'],
-        body: ['DM Sans', 'system-ui', 'sans-serif'],
+        display: ['Quicksand', 'sans-serif'],
+        body: ['DM Sans', 'sans-serif'],
       },
       boxShadow: {
-        'soft': '0 4px 20px rgba(255, 192, 203, 0.15)',
-        'soft-hover': '0 8px 30px rgba(255, 192, 203, 0.25)',
-      },
-      animation: {
-        'bounce-soft': 'bounce-soft 0.6s ease-in-out',
-        'fade-in': 'fade-in 0.3s ease-out',
-      },
-      keyframes: {
-        'bounce-soft': {
-          '0%, 100%': { transform: 'scale(1)' },
-          '50%': { transform: 'scale(1.05)' },
-        },
-        'fade-in': {
-          '0%': { opacity: '0', transform: 'translateY(-10px)' },
-          '100%': { opacity: '1', transform: 'translateY(0)' },
-        },
+        soft: '0 2px 8px rgba(0, 0, 0, 0.08)',
+        'soft-hover': '0 4px 12px rgba(0, 0, 0, 0.12)',
       },
     },
   },
   plugins: [],
-}
-export default config
+};
+
+export default config;
