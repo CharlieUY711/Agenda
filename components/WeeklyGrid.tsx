@@ -161,7 +161,7 @@ export default function WeeklyGrid() {
             );
           })}
         </div>
-        <div className="w-14 flex-shrink-0 ml-3 bg-red-50" />
+        <div className="w-14 flex-shrink-0 ml-3" />
       </motion.div>
     );
   };
@@ -224,18 +224,21 @@ export default function WeeklyGrid() {
           )}
         </motion.div>
 
-        {isOwner && !editMode && (
-          <div className="fixed right-8 top-32 z-10">
-            <CompactActionBar
-              selectedColor={selectedColor}
-              selectedLabel={selectedLabel}
-              onColorSelect={setSelectedColor}
-              onLabelSelect={setSelectedLabel}
-            />
-          </div>
-        )}
-
-        <div className="bg-gradient-to-br from-pastel-pink/10 via-pastel-lavender/10 to-pastel-blue/10 rounded-xl p-2 shadow-soft inline-block">
+        <div className="bg-gradient-to-br from-pastel-pink/10 via-pastel-lavender/10 to-pastel-blue/10 rounded-xl p-2 shadow-soft inline-block relative">
+          {/* Barra de acciones posicionada en el espacio derecho */}
+          {isOwner && !editMode && (
+            <div className="absolute right-2 top-2 w-14 pointer-events-none">
+              <div className="sticky top-20 pointer-events-auto">
+                <CompactActionBar
+                  selectedColor={selectedColor}
+                  selectedLabel={selectedLabel}
+                  onColorSelect={setSelectedColor}
+                  onLabelSelect={setSelectedLabel}
+                />
+              </div>
+            </div>
+          )}
+          
           <div>
             <div className="flex items-start mb-2">
               <div className="w-14 flex-shrink-0 mr-3">
