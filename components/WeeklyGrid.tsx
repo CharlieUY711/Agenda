@@ -5,7 +5,6 @@ import { format, startOfWeek, addDays, subDays } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { motion, AnimatePresence } from 'framer-motion';
 import SlotButton from './SlotButton';
-import CompactActionBar from './CompactActionBar';
 import { getWeeklySlots, toggleSlot } from '@/lib/database';
 import { useFingerprint } from '@/hooks/useFingerprint';
 import { useOwner } from '@/hooks/useOwner';
@@ -117,54 +116,73 @@ export default function WeeklyGrid() {
     setEditMode(false);
   };
 
-  const renderRow = (hour: string, isGroup: boolean = false, groupLabel?: string) => {
-    return (
-      <motion.div
-        key={`row-${hour}`}
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        className="flex items-center mb-1"
-      >
-        <div className="w-14 flex-shrink-0 flex items-center justify-end mr-3">
-          <span className="font-body text-gray-600 font-semibold text-xs">
-            {hour}
-          </span>
-        </div>
-        <div className="flex gap-1">
-          {weekDays.map((day, dayIndex) => {
-            const dayStr = format(day, 'yyyy-MM-dd');
-            const slotData = getSlotData(dayStr, hour);
-            
-            return (
-              <div key={`${dayStr}-${hour}`} className="w-32 flex-shrink-0">
-                {isGroup ? (
-                  <button
-                    onClick={() => handleGroupClick(groupLabel || hour)}
-                    onMouseDown={() => handleGroupMouseDown(groupLabel || hour)}
-                    onMouseUp={handleGroupMouseUp}
-                    onMouseLeave={handleGroupMouseUp}
-                    className="w-full h-8 rounded-lg bg-gray-50 border border-gray-200 hover:bg-gray-100 transition-colors flex items-center justify-center"
-                  >
-                    <span className="text-[10px] text-gray-400">•</span>
-                  </button>
-                ) : (
-                  <SlotButton
-                    day={dayStr}
-                    hour={hour}
-                    color={slotData?.color as PastelColor}
-                    label={slotData?.label}
-                    isOwner={isOwner}
-                    onClick={() => handleSlotClick(dayStr, hour)}
-                  />
-                )}
-              </div>
-            );
-          })}
-        </div>
-        <div className="w-14 flex-shrink-0 ml-3" />
-      </motion.div>
-    );
-  };
+  const renderRow = (
+  hour: string,
+  isGroup: boolean = false,
+  groupLabel?: string
+) => {
+  return (
+    <motion.div
+      key={`row-${hour}`}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      className="flex items-center mb-1"
+    >
+      {/* HOUR */}
+      <div className="w-14 flex-shrink-0 flex items-center justify-end mr-3">
+        <span className="font-body text-gray-600 font-semibold text-xs">
+          {hour}
+        </span>
+      </div>
+
+      {/* GRID */}
+      <div className="flex gap-1 flex-1">
+        {weekDays.map((day) => {
+          const dayStr = format(day, 'yyyy-MM-dd');
+          const slotData = getSlotData(dayStr, hour);
+
+          return (
+            <div key={`${dayStr}-${hour}`} className="w-32 flex-shrink-0">
+              {isGroup ? (
+                <button
+                  onClick={() => handleGroupClick(groupLabel || hour)}
+                  onMouseDown={() =>
+                    handleGroupMouseDown(groupLabel || hour)
+                  }
+                  onMouseUp={handleGroupMouseUp}
+                  onMouseLeave={handleGroupMouseUp}
+                  className="w-full h-8 rounded-lg bg-gray-50 border border-gray-200 hover:bg-gray-100 transition-colors flex items-center justify-center"
+                >
+                  <span className="text-[10px] text-gray-400">•</span>
+                </button>
+              ) : (
+                <SlotButton
+                  day={dayStr}
+                  hour={hour}
+                  color={slotData?.color as PastelColor}
+                  label={slotData?.label}
+                  isOwner={isOwner}
+                  onClick={() => handleSlotClick(dayStr, hour)}
+                />
+              )}
+            </div>
+          );
+        })}
+      </div>
+
+      {/* RIGHT SPACER */}
+<div className="flex-shrink-0 ml-3 flex items-center justify-center pl-1 pr-1">
+  {CORE_HOURS.includes(hour) ? (
+    <div className="flex items-center gap-2">
+      <button className="w-8 h-8 bg-green-100 hover:bg-green-200 rounded-md border border-green-200 transition-colors" />
+      <button className="w-8 h-8 bg-green-100 hover:bg-green-200 rounded-md border border-green-200 transition-colors" />
+    </div>
+  ) : null}
+</div>    
+
+   </motion.div>
+  );
+};
 
   if (ownerLoading) {
     return (
@@ -225,21 +243,7 @@ export default function WeeklyGrid() {
         </motion.div>
 
         <div className="bg-gradient-to-br from-pastel-pink/10 via-pastel-lavender/10 to-pastel-blue/10 rounded-xl p-2 shadow-soft inline-block relative">
-          {/* Barra de acciones posicionada en el espacio derecho */}
-          {isOwner && !editMode && (
-            <div className="absolute right-2 top-2 w-14 pointer-events-none">
-              <div className="sticky top-20 pointer-events-auto">
-                <CompactActionBar
-                  selectedColor={selectedColor}
-                  selectedLabel={selectedLabel}
-                  onColorSelect={setSelectedColor}
-                  onLabelSelect={setSelectedLabel}
-                />
-              </div>
-            </div>
-          )}
-          
-          <div>
+           <div>
             <div className="flex items-start mb-2">
               <div className="w-14 flex-shrink-0 mr-3">
                 <div className="text-right">

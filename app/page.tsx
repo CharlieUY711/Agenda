@@ -1,4 +1,4 @@
-import WeeklyGrid from '@/components/WeeklyGrid';
+import WeeklyGrid from '../components/WeeklyGrid';
 
 export default function Home() {
   return (
